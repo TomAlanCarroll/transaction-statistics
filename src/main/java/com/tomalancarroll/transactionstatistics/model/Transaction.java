@@ -39,7 +39,7 @@ public class Transaction {
         return time;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.time = Instant.ofEpochMilli(timestamp);
     }
 }
