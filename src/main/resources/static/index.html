@@ -14,7 +14,7 @@
     function addTransaction() {
       var requestBody = {
         amount: parseFloat($("#amount").val()),
-        timestamp: Date.now() - (parseFloat($("#time").val()) * 1000) // now - seconds before now to ms
+        timestamp: Date.now()
       };
       $.ajax({
         url: "/transactions",
@@ -22,10 +22,22 @@
         data: JSON.stringify(requestBody),
         contentType: "application/json; charset=utf-8",
         success: function(data, status, jqXHR){
-          alert("Status: " + status);
+          var notification = document.querySelector('.mdl-js-snackbar');
+          notification.MaterialSnackbar.showSnackbar(
+            {
+              message: requestBody.amount + ' was added.',
+              timeout: 700
+            }
+          );
         },
         error: function(jqXHR, status, errorThrown){
-          alert("You problem left a field blank. Status: " + jqXHR.status);
+          var notification = document.querySelector('.mdl-js-snackbar');
+          notification.MaterialSnackbar.showSnackbar(
+            {
+              message: 'Transaction was not added; Status: ' + jqXHR.status,
+              timeout: 4000
+            }
+          );
         }
       });
     }
@@ -33,10 +45,10 @@
     function getStatistics() {
       $.get("/statistics", function(data, status){
         if (status === "success") {
-          document.getElementById("sum").innerHTML = data.sum;
-          document.getElementById("avg").innerHTML = data.avg;
-          document.getElementById("max").innerHTML = data.max;
-          document.getElementById("min").innerHTML = data.min;
+          document.getElementById("sum").innerHTML = data.sum.toFixed(2).replace(/\.00$/, '');
+          document.getElementById("avg").innerHTML = data.avg.toFixed(2).replace(/\.00$/, '');
+          document.getElementById("max").innerHTML = data.max.toFixed(2).replace(/\.00$/, '');
+          document.getElementById("min").innerHTML = data.min.toFixed(2).replace(/\.00$/, '');
           document.getElementById("count").innerHTML = data.count;
         }
       });
@@ -82,11 +94,6 @@
 <h2>Create a Transaction</h2>
 <form id="add-transaction" action="#" onsubmit="addTransaction()">
   <div class="mdl-textfield mdl-js-textfield">
-    <label for="time">Seconds before now:</label>
-    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="time" value="0" />
-    <span class="mdl-textfield__error">Seconds are not a number</span>
-  </div>
-  <div class="mdl-textfield mdl-js-textfield">
     <label for="amount">Amount:</label>
     <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="amount" value="42" />
     <span class="mdl-textfield__error">Amount is not a number</span>
@@ -128,8 +135,11 @@
     </tr>
   </tbody>
 </table>
-<p><sub>1</sub><em>Up to 1 second delay plus latency</em></p>
+<p><sub>1</sub><em>Up to 1 second delay plus latency; all statistics are shown up to 2 decimal places</em></p>
 <p><sub>2</sub><em>Current Statistics are in the Window of Interest, defaulting to the past 60 seconds</em></p>
-
+<div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
+  <div class="mdl-snackbar__text"></div>
+  <button type="button" class="mdl-snackbar__action"></button>
+</div>
 </body>
 </html>
