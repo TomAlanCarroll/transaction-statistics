@@ -55,8 +55,7 @@ public class TransactionService {
      * Resets the in-memory transaction store
      */
     public void deleteAll() {
-        this.transactions = new ObjectLockingIndexedCollection<>();
-        this.transactions.addIndex(NavigableIndex.onAttribute(Transaction.TIME));
+        this.transactions.clear();
     }
 
     /**
