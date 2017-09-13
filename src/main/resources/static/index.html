@@ -2,11 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>
-    Transaction Statistics
-  </title>
+  <title>Transaction Statistics</title>
+  <!-- External Libraries -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue_grey-red.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <!-- Adding Transactions / Polling JS -->
+  <script type="text/javascript">
+    function addTransaction() {
+      var requestBody = {
+        amount: parseFloat($("#amount").val()),
+        timestamp: Date.now() - (parseFloat($("#time").val()) * 1000) // now - seconds before now to ms
+      };
+      $.ajax({
+        url: "/transactions",
+        type: "POST",
+        data: JSON.stringify(requestBody),
+        contentType: "application/json; charset=utf-8",
+        success: function(data, status, jqXHR){
+          alert("Status: " + status);
+        },
+        error: function(jqXHR, status, errorThrown){
+          alert("You problem left a field blank. Status: " + jqXHR.status);
+        }
+      });
+    }
+
+    function getStatistics() {
+      $.get("/statistics", function(data, status){
+        if (status === "success") {
+          document.getElementById("sum").innerHTML = data.sum;
+          document.getElementById("avg").innerHTML = data.avg;
+          document.getElementById("max").innerHTML = data.max;
+          document.getElementById("min").innerHTML = data.min;
+          document.getElementById("count").innerHTML = data.count;
+        }
+      });
+    }
+
+    function setupPolling() {
+      getStatistics();
+      setInterval(getStatistics, 1000);
+    }
+  </script>
+
+  <!-- CSS Customizations -->
+  <style type="text/css">
+    body {
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 32px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: .02em;
+    }
+    #add-transaction input {
+      display: inline;
+      width: 75px;
+      text-align: center;
+    }
+    #statistics {
+      margin: auto; min-width: 225px
+    }
+    .mdl-textfield {
+      min-width: 250px;
+    }
+  </style>
 </head>
-<body>
-Transaction Statistics
+<body onload="setupPolling()">
+<h1>Transaction Statistics</h1>
+<h2>Create a Transaction</h2>
+<form id="add-transaction" action="#" onsubmit="addTransaction()">
+  <div class="mdl-textfield mdl-js-textfield">
+    <label for="time">Seconds before now:</label>
+    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="time" value="0" />
+    <span class="mdl-textfield__error">Seconds are not a number</span>
+  </div>
+  <div class="mdl-textfield mdl-js-textfield">
+    <label for="amount">Amount:</label>
+    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="amount" value="42" />
+    <span class="mdl-textfield__error">Amount is not a number</span>
+  </div>
+  <button id="add-transaction-button" type="submit"
+          class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored">
+    <i class="material-icons">add</i>
+  </button>
+</form>
+
+<h2>Current Statistics<sub>1,2</sub></h2>
+<table id="statistics" onload="setupPolling()" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+  <thead>
+    <tr>
+      <th scope="col">Statistic</th>
+      <th scope="col">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>sum:</td>
+      <td id="sum"></td>
+    </tr>
+    <tr>
+      <td>avg:</td>
+      <td id="avg"></td>
+    </tr>
+    <tr>
+      <td>max:</td>
+      <td id="max"></td>
+    </tr>
+    <tr>
+      <td>min:</td>
+      <td id="min"></td>
+    </tr>
+    <tr>
+      <td>count:</td>
+      <td id="count"></td>
+    </tr>
+  </tbody>
+</table>
+<p><sub>1</sub><em>Up to 1 second delay plus latency</em></p>
+<p><sub>2</sub><em>Current Statistics are in the Window of Interest, defaulting to the past 60 seconds</em></p>
+
 </body>
 </html>
