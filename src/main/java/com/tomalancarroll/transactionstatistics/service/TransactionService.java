@@ -44,9 +44,6 @@ public class TransactionService {
         if (transaction == null || transaction.getAmount() == null || transaction.getTime() == null) {
             throw new IllegalArgumentException("Null or invalid transaction provided to TransactionService");
         }
-        if (transaction.getTime().isAfter(Instant.now())) {
-            throw new IllegalArgumentException("The transaction time must be before the current UTC time");
-        }
 
         transactions.add(transaction);
     }
